@@ -13,7 +13,6 @@ class BelongsToMany extends EloquentBelongsToMany
 {
     /**
      * Get the key for comparing against the parent key in "has" query.
-     *
      * @return string
      */
     public function getHasCompareKey()
@@ -22,9 +21,25 @@ class BelongsToMany extends EloquentBelongsToMany
     }
 
     /**
-     * Get the fully qualified foreign key for the relation.
-     *
-     * @return string
+     * @inheritdoc
+     */
+    public function getRelationExistenceQuery(Builder $query, Builder $parentQuery, $columns = ['*'])
+    {
+        return $query;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function hydratePivotRelation(array $models)
+    {
+        // Do nothing.
+    }
+
+    /**
+     * Set the select clause for the relation query.
+     * @param array $columns
+     * @return array
      */
     public function getForeignKey()
     {
@@ -51,7 +66,6 @@ class BelongsToMany extends EloquentBelongsToMany
 
     /**
      * Set the where clause for the relation query.
-     *
      * @return $this
      */
     protected function setWhere()
@@ -336,7 +350,8 @@ class BelongsToMany extends EloquentBelongsToMany
     }
 
     /**
-     * @inheritdoc
+     * Create a new query builder for the related model.
+     * @return \Illuminate\Database\Query\Builder
      */
     protected function hydratePivotRelation(array $models)
     {
@@ -350,10 +365,8 @@ class BelongsToMany extends EloquentBelongsToMany
     }
 
     /**
-     * Set the select clause for the relation query.
-     *
-     * @param  array  $columns
-     * @return array
+     * Get the fully qualified foreign key for the relation.
+     * @return string
      */
     protected function getSelectColumns(array $columns = ['*'])
     {
@@ -387,6 +400,24 @@ class BelongsToMany extends EloquentBelongsToMany
                 } else {
                     $dictionary[$item][] = $result;
                 }
+               }
+        }
+
+        return $dictionary;
+    }
+    /**
+     * Format the sync list so that it is keyed by ID. (Legacy Support)
+     * The original function has been renamed to formatRecordsList since Laravel 5.3
+     * @param array $records
+     * @return array
+     * @deprecated
+     */
+    protected function formatSyncList(array $records)
+    {
+        $results = [];
+        foreach ($records as $id => $attributes) {
+            if (!is_array($attributes)) {
+                list($id, $attributes) = [$attributes, []];
             }
         }
 
@@ -394,7 +425,8 @@ class BelongsToMany extends EloquentBelongsToMany
     }
 
     /**
-     * @inheritdoc
+     * Get the related key with backwards compatible support.
+     * @return string
      */
     protected function newPivotQuery()
     {
@@ -403,9 +435,8 @@ class BelongsToMany extends EloquentBelongsToMany
 
     /**
      * Get the name of the "where in" method for eager loading.
-     *
-     * @param  EloquentModel  $model
-     * @param  string  $key
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param string $key
      * @return string
      */
     protected function whereInMethod(EloquentModel $model, $key)
